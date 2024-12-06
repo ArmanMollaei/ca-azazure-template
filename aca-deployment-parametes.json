@@ -1,0 +1,72 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subscriptionId": {
+            "value": "15787c06-8980-4aa3-85bb-138fda4611c1"
+        },
+        "name": {
+            "value": "test-app"
+        },
+        "location": {
+            "value": "eastus"
+        },
+        "environmentId": {
+            "value": "/subscriptions/15787c06-8980-4aa3-85bb-138fda4611c1/resourceGroups/capgemini/providers/Microsoft.App/managedEnvironments/managedEnvironment-capgemini"
+        },
+        "containers": {
+            "value": [
+                {
+                    "name": "test-app",
+                    "image": "armanm.azurecr.io/app:temp",
+                    "command": [],
+                    "args": [],
+                    "resources": {
+                        "cpu": "0.5",
+                        "memory": "1Gi"
+                    }
+                }
+            ]
+        },
+        "registries": {
+            "value": [
+                {
+                    "server": "armanm.azurecr.io",
+                    "username": "Armanm",
+                    "passwordSecretRef": "reg-pswd-30c974fe-953e"
+                }
+            ]
+        },
+               "secrets": {
+            "value": {
+                "arrayValue": [
+                    {
+                        "name": "reg-pswd-30c974fe-953e",
+                        "value": "fffffff"
+                    }
+                ]
+            }
+        },
+        "ingress": {
+            "value": {
+                "external": true,
+                "transport": "Auto",
+                "allowInsecure": true,
+                "targetPort": 8080,
+                "stickySessions": {
+                    "affinity": "none"
+                },
+                "additionalPortMappings": []
+            }	
+        },
+        "environmentName": {
+            "value": "managedEnvironment-capgemini"
+        },
+        "workspaceName": {
+            "value": "workspacecapgemini8b9f"
+        },
+        "workspaceLocation": {
+            "value": "eastus"
+        }
+    }
+}

@@ -1,0 +1,60 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "acrName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Azure Container Registry. Must be globally unique."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for the Azure Container Registry."
+            }
+        },
+        "skuTier": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "Standard",
+                "Premium"
+            ],
+            "metadata": {
+                "description": "The SKU tier for the Azure Container Registry."
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.ContainerRegistry/registries",
+            "apiVersion": "2023-07-01",
+            "name": "[parameters('acrName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[parameters('skuTier')]",
+                "tier": "[parameters('skuTier')]"
+            },
+            "properties": {
+                "adminUserEnabled": true,
+                "publicNetworkAccess": "Enabled",
+                "policies": {
+                    "quarantinePolicy": {
+                        "status": "disabled"
+                    },
+                    "trustPolicy": {
+                        "type": "Notary",
+                        "status": "disabled"
+                    },
+                    "softDeletePolicy": {
+                        "status": "disabled",
+                        "retentionDays": 7
+                    }
+                }
+            }
+        }
+    ]
+}

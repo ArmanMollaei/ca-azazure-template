@@ -1,0 +1,155 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+- group: CI
+
+stages:
+- stage: CreateResourcesRG
+  displayName: Create RG
+  jobs:
+  - job: DeployJob
+    steps:
+    - task: AzureResourceManagerTemplateDeployment@3
+      displayName: Create Resource Group
+      inputs:
+        deploymentScope: 'Subscription'
+        azureResourceManagerConnection: 'Azure subscription 1(15787c06-8980-4aa3-85bb-138fda4611c1)'
+        subscriptionId: '15787c06-8980-4aa3-85bb-138fda4611c1'
+        location: 'East US'
+        templateLocation: 'Linked artifact'
+        csmFile: 'rg-deployment-templates.json'
+        csmParametersFile: 'rg-deployment-parameters.json'
+        deploymentMode: 'Incremental'
+
+- stage: CreateResourcesACR
+  displayName: Create ACR
+  jobs:
+  - job: DeployJob
+    steps:
+    - task: AzureResourceManagerTemplateDeployment@3
+      displayName: Create Azure Container Registery
+      inputs:
+        deploymentScope: 'Resource Group'
+        azureResourceManagerConnection: 'Azure subscription 1(15787c06-8980-4aa3-85bb-138fda4611c1)'
+        subscriptionId: '15787c06-8980-4aa3-85bb-138fda4611c1'
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: 'capgemini'
+        location: 'eastus'
+        templateLocation: 'Linked artifact'
+        csmFile: '$(System.DefaultWorkingDirectory)/acr-deployment-templates.json'
+        csmParametersFile: '$(System.DefaultWorkingDirectory)/acr-deployment-parameters.json'
+        deploymentMode: 'Incremental'
+        addSpnToEnvironment: true
+        useWithoutJSON: true     
+
+    - task: AzureCLI@2
+      displayName: Create ServiceConnection
+      inputs:
+        azureSubscription: 'AzureDevops-ServiceConnection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo $(PAT) | az devops login
+          ACR_PASSWORD=$(az acr credential show --name armanm --query "passwords[1].value" --output tsv)
+          sed -i "s/CHANGEME/$(echo $ACR_PASSWORD | sed -e 's/[\/&]/\\&/g')/g" docker-registry-config.json
+          az devops service-endpoint create --service-endpoint-configuration docker-registry-config.json --org https://dev.azure.com/devopsarm23/ --project Capgemini-Project
+
+    - task: AzureCLI@2
+      displayName: Test ACR
+      inputs:
+        azureSubscription: 'AzureDevops-ServiceConnection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          docker login armanm.azurecr.io --username "Armanm" --password $(az acr credential show --name armanm --query "passwords[0].value" --output tsv)
+          docker build -f Dockerfile-temp -t app:temp .
+          docker tag app:temp armanm.azurecr.io/app:temp
+          docker push armanm.azurecr.io/app:temp
+
+- stage: CreateResourcesACA
+  displayName: Create ACA
+  jobs:
+  - job: DeployJob
+    steps:
+
+    - task: AzureCLI@2
+      displayName: Get ACR Credentials
+      inputs:
+        azureSubscription: 'AzureDevops-ServiceConnection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          ACR_PASSWORD=$(az acr credential show --name armanm --query "passwords[1].value" --output tsv)
+          sed -i "s/fffffff/$(echo $ACR_PASSWORD | sed -e 's/[\/&]/\\&/g')/g" aca-deployment-parametes.json
+          cat aca-deployment-parametes.json
+    - task: AzureCLI@2
+      displayName: Create creat app
+      inputs:
+        azureSubscription: 'AzureDevops-ServiceConnection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: 'az deployment group create --name test --resource-group capgemini --template-file $(System.DefaultWorkingDirectory)/aca-deployment-templates.json --parameters $(System.DefaultWorkingDirectory)/aca-deployment-parametes.json --mode Incremental'
+
+- stage: CreateResourcesACADEV
+  displayName: Create ACA DEV
+  jobs:
+  - job: DeployJob
+    steps:
+
+    - task: AzureCLI@2
+      displayName: Get ACR Credentials
+      inputs:
+        azureSubscription: 'AzureDevops-ServiceConnection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          ACR_PASSWORD=$(az acr credential show --name armanm --query "passwords[1].value" --output tsv)
+          sed -i "s/fffffff/$(echo $ACR_PASSWORD | sed -e 's/[\/&]/\\&/g')/g" aca-deployment-parametes-dev.json
+          cat aca-deployment-parametes-dev.json
+    - task: AzureCLI@2
+      displayName: Create creat app
+      inputs:
+        azureSubscription: 'AzureDevops-ServiceConnection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: 'az deployment group create --name testdev --resource-group capgemini --template-file $(System.DefaultWorkingDirectory)/aca-deployment-templates-dev.json --parameters $(System.DefaultWorkingDirectory)/aca-deployment-parametes-dev.json --mode Incremental'
+
+
+
+- stage: DeleteResources
+  displayName: Delete Resources
+  dependsOn:
+    - CreateResourcesACADEV
+  jobs:
+  - deployment: DeployJob
+    pool:
+      vmImage: ubuntu-latest
+    environment: "arman"
+    strategy:
+      runOnce: 
+        deploy:
+          steps:
+          - task: AzureResourceManagerTemplateDeployment@3
+            inputs:
+              deploymentScope: 'Resource Group'
+              azureResourceManagerConnection: 'AzureDevops-ServiceConnection'
+              subscriptionId: '15787c06-8980-4aa3-85bb-138fda4611c1'
+              action: 'DeleteRG'
+              resourceGroupName: 'capgemini'
+          - task: Bash@3
+            displayName: Delete ServiceConnection
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo $(PAT) | az devops login
+                SERVICE_CONNECTION_ID=$(az devops service-endpoint list --organization https://dev.azure.com/devopsarm23/ --project Capgemini-Project --query "[?name=='ACR-ServiceConnection'].id" -o tsv)
+                az devops service-endpoint delete --id $SERVICE_CONNECTION_ID --organization https://dev.azure.com/devopsarm23/ --project Capgemini-Project --yes

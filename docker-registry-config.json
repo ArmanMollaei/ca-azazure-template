@@ -1,0 +1,60 @@
+{
+  "administratorsGroup": null,
+  "authorization": {
+    "parameters": {
+      "email": "",
+      "password": "CHANGEME",
+      "registry": "https://armanm.azurecr.io",
+      "username": "Armanm"
+    },
+    "scheme": "UsernamePassword"
+  },
+  "createdBy": {
+    "descriptor": "msa.NjM1MzUxNGYtYTdkMy03NDE2LWExNTUtNTRmNjE3YTE0ODAx",
+    "directoryAlias": null,
+    "displayName": "Arman Mollai",
+    "id": "6353514f-a7d3-6416-a155-54f617a14801",
+    "imageUrl": "https://dev.azure.com/devopsarm23/_apis/GraphProfile/MemberAvatars/msa.NjM1MzUxNGYtYTdkMy03NDE2LWExNTUtNTRmNjE3YTE0ODAx",
+    "inactive": null,
+    "isAadIdentity": null,
+    "isContainer": null,
+    "isDeletedInOrigin": null,
+    "profileUrl": null,
+    "uniqueName": "devops.arm23@outlook.com",
+    "url": "https://spsproduks1.vssps.visualstudio.com/A589d1aac-0427-4d67-ab98-7f58351bdac0/_apis/Identities/6353514f-a7d3-6416-a155-54f617a14801"
+  },
+  "data": {
+    "appObjectId": "",
+    "azureSpnPermissions": "",
+    "azureSpnRoleAssignmentId": "",
+    "creationMode": "",
+    "registryId": "",
+    "registrytype": "Others",
+    "spnObjectId": "",
+    "subscriptionId": "",
+    "subscriptionName": ""
+  },
+  "description": "",
+  "groupScopeId": null,
+  "id": "fac5ea6a-4aae-4a25-8501-e9ab5bda96fd",
+  "isOutdated": false,
+  "isReady": true,
+  "isShared": false,
+  "name": "ACR-ServiceConnection",
+  "operationStatus": null,
+  "owner": "Library",
+  "readersGroup": null,
+  "serviceEndpointProjectReferences": [
+    {
+      "description": "",
+      "name": "ACR-ServiceConnection",
+      "projectReference": {
+        "id": "564698db-dd69-48b3-ae99-2d12abf50d88",
+        "name": "Capgemini-Project"
+      }
+    }
+  ],
+  "serviceManagementReference": null,
+  "type": "dockerregistry",
+  "url": "https://hub.docker.com/"
+}
