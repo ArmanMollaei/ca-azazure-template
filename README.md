@@ -1,20 +1,19 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# Azure Pipeline & ARM Template for ACR, ACA, and ACR Service Connection
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+## Introduction
+This repository provides an Azure Pipeline and an ARM Template designed to automate the creation of Azure Container Registry (ACR), Azure Container Apps (ACA), and the configuration of the ACR service connection. The goal of this project is to streamline the deployment of containerized applications to Azure and manage the necessary resources with minimal manual intervention.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+### Software Dependencies
+- Azure CLI
+- Azure DevOps account (for the pipeline)
+- Azure Resource Manager (ARM) Template
+- Docker (for building and pushing images to ACR)
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+### Latest Releases
+This repository is regularly updated to align with the latest Azure services and DevOps practices. You can view the latest releases in the [Releases](https://github.com/yourusername/your-repo-name/releases) section.
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+### References
+- [Azure Container Registry API](https://learn.microsoft.com/en-us/rest/api/containerregistry/)
+- [Azure Container Apps API](https://learn.microsoft.com/en-us/rest/api/appservice/azure-container-apps)
+- [Azure DevOps Pipeline Documentation](https://learn.microsoft.com/en-us/azure/devops/pipelines/?view=azure-devops)
+
